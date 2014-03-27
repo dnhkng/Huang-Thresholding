@@ -48,7 +48,7 @@ def mask_image_final(data):
     y, x = numpy.ogrid[-a:h - a, -b:w - b]
     #Thanks, Mr. Pythagorus!
     mask = x * x + y * y <= r * r
-    array = numpy.zeros((h, w))
+    array = numpy.zeros((h, w) )
     array[mask] = 1
     masked = data * array
     return masked
@@ -71,7 +71,6 @@ def huang(data):
             last_bin = ih
             break
     term = 1.0 / (last_bin - first_bin)
-    #print first_bin, last_bin, term
     mu_0 = numpy.zeros(shape=(254, 1))
     num_pix = 0.0
     sum_pix = 0.0
@@ -104,7 +103,6 @@ def huang(data):
         if ent < min_ent:
             min_ent = ent
             threshold = it
-            #print "threshold ", threshold
     return threshold
 
 
@@ -120,13 +118,8 @@ def process_image(data):
     threshold = scipy.ndimage.binary_dilation(threshold, structure=numpy.ones((2, 2))).astype(threshold.dtype)
     # finds objects
     object_map, count = scipy.ndimage.label(threshold)
-    # size and brightness of objects
-    #sizes = scipy.ndimage.sum(threshold, object_map, range(count + 1))
-    #mean_vals = scipy.ndimage.sum(image_clean, object_map, range(1, count + 1))
-    # find the properties of each object, list of dictionaries
     properties = skimage.measure.regionprops(object_map, properties=['Area', 'Perimeter', 'Centroid'])
     # list of objects that should be removed (too small, non circular etc.)
-    #[False] * num_features
     remove_object = numpy.zeros(count + 1, dtype=bool)
     for i in range(1, count):
         if properties[i - 1]['Area'] < 10:
@@ -141,7 +134,6 @@ def process_image(data):
     object_map = mask_image_final(object_map)
     # find the remaining objects, and print their properties
     object_map, count = scipy.ndimage.label(object_map)
-    #properties = skimage.measure.regionprops(object_map, properties=['Area', 'Perimeter', 'Centroid'])
 
     return object_map
 
