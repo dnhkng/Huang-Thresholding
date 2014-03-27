@@ -3,7 +3,9 @@ import math
 import scipy.ndimage
 import skimage.measure
 
-
+def update_progress(progress):
+    print '\r[{0}] {1}%'.format('#'*(progress/10), progress)
+    
 def mask_image_initial(data):
     """ This function generates a mask, that sets the area outside the plate to black.
     Its basically an array the size of the picture, with a filled circle in the middle """
@@ -103,6 +105,7 @@ def huang(data):
         if ent < min_ent:
             min_ent = ent
             threshold = it
+        update_progress(256)    
     return threshold
 
 
@@ -144,14 +147,14 @@ def get_positions(object_map):
     locations = [i['Centroid'] for i in locations]
     return locations
 
+if __name__ == "__main__":
+    # Load and process the image
+    image = numpy.load('colonies.npy')
+    objects = process_image(image)
+    positions = get_positions(objects)
 
-# Load and process the image
-image = numpy.load('colonies.npy')
-objects = process_image(image)
-positions = get_positions(objects)
+    # Plot the found colonies!
+    import matplotlib.pyplot as plt
 
-# Plot the found colonies!
-import matplotlib.pyplot as plt
-
-plt.imshow(objects, cmap='jet')
-plt.show()
+    plt.imshow(objects, cmap='jet')
+    plt.show()
