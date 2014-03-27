@@ -119,35 +119,36 @@ def process_image(data):
     threshold = scipy.ndimage.binary_erosion(threshold, structure=numpy.ones((4, 4))).astype(threshold.dtype)
     threshold = scipy.ndimage.binary_dilation(threshold, structure=numpy.ones((2, 2))).astype(threshold.dtype)
     # finds objects
-    objects, count = scipy.ndimage.label(threshold)
+    object_map, count = scipy.ndimage.label(threshold)
     # size and brightness of objects
-    sizes = scipy.ndimage.sum(threshold, objects, range(count + 1))
-    mean_vals = scipy.ndimage.sum(image_clean, objects, range(1, count + 1))
+    #sizes = scipy.ndimage.sum(threshold, object_map, range(count + 1))
+    #mean_vals = scipy.ndimage.sum(image_clean, object_map, range(1, count + 1))
     # find the properties of each object, list of dictionaries
-    properties = skimage.measure.regionprops(objects, properties=['Area', 'Perimeter', 'Centroid'])
+    properties = skimage.measure.regionprops(object_map, properties=['Area', 'Perimeter', 'Centroid'])
     # list of objects that should be removed (too small, non circular etc.)
-    remove_object = numpy.zeros(count + 1, dtype=bool)  #[False] * num_features
+    #[False] * num_features
+    remove_object = numpy.zeros(count + 1, dtype=bool)
     for i in range(1, count):
         if properties[i - 1]['Area'] < 10:
             remove_object[i] = True
-        if (4 * math.pi * properties[i - 1]['Area'] / (
-            properties[i - 1]['Perimeter'] * properties[i - 1]['Perimeter']) <= 0.9):
+        if (4 * math.pi * properties[i - 1]['Area'] /
+                (properties[i - 1]['Perimeter'] * properties[i - 1]['Perimeter']) <= 0.9):
             remove_object[i] = True
     # remove the pixels of the unwanted objects from the map by setting them to zero
-    remove_pixel = remove_object[objects]
-    objects[remove_pixel] = 0
+    remove_pixel = remove_object[object_map]
+    object_map[remove_pixel] = 0
     # remove false object generated end the plate edge
-    objects = mask_image_final(objects)
+    object_map = mask_image_final(object_map)
     # find the remaining objects, and print their properties
-    objects, count = scipy.ndimage.label(objects)
-    properties = skimage.measure.regionprops(objects, properties=['Area', 'Perimeter', 'Centroid'])
+    object_map, count = scipy.ndimage.label(object_map)
+    #properties = skimage.measure.regionprops(object_map, properties=['Area', 'Perimeter', 'Centroid'])
 
-    return objects
+    return object_map
 
 
-def get_positions(objects):
+def get_positions(object_map):
     """docstring for positions"""
-    locations = skimage.measure.regionprops(objects, properties=['Centroid'])
+    locations = skimage.measure.regionprops(object_map, properties=['Centroid'])
     locations = [i['Centroid'] for i in locations]
     return locations
 
@@ -159,5 +160,6 @@ positions = get_positions(objects)
 
 # Plot the found colonies!
 import matplotlib.pyplot as plt
+
 plt.imshow(objects, cmap='jet')
 plt.show()
