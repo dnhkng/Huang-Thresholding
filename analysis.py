@@ -28,7 +28,7 @@ def mask_image_initial(data):
 def remove_background(data):
     """Remove background and stretchs data to 8-bit range"""
     # convert to floating point (integers lose 99% of data!)
-    data = image.astype(float)
+    data = data.astype(float)
     data = numpy.fabs(4096 - data)
     # remove strongly blurred 'background' from slightly blurred foreground
     no_background = scipy.ndimage.median_filter(data, 2) / scipy.ndimage.median_filter(data, 20) * numpy.mean(data)
