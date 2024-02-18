@@ -22,7 +22,7 @@ To calculate the Huang Thresholding, you would use the following code to first g
 import numpy as np
 from huang_thresholding import HuangThresholding
 
-colony_data = np.load("colonies.npy"), bins=range(257)
+colony_data = np.load("colonies.npy")
 histogram_data, _ = np.histogram(colony_data, bins=range(257))
 huang_thresholding = HuangThresholding(histogram_data)
 threshold = huang_thresholding.find_threshold()
